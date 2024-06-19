@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    <form id="task-form">
+        <input type="text" id="title" placeholder="Title" required>
+        <textarea id="description" placeholder="Description"></textarea>
+        <select id="status">
+            <option value="PENDING">Pending</option>
+            <option value="COMPLETED">Completed</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+    <ul id="task-list"></ul>
+    <script>
+        const taskForm = document.getElementById('task-form');
+        const taskList = document.getElementById('task-list');
+
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const status = document.getElementById('status').value;
+
+            const response = await fetch('/api/tasks/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, description, status }),
+            });
+
+            if (response.ok) {
+                loadTasks();
+            }
+        });
+
+        async function loadTasks() {
+            const response = await fetch('/api/tasks/');
+            const tasks = await response.json();
+
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.textContent = `${task.title} - ${task.description} (${task.status})`;
+                taskList.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTasks);
+    </script>
+</body>
+</html>
